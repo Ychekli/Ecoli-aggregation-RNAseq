@@ -6,7 +6,6 @@ This repo hosts all proccesed sequencing data and scripts to generate the figure
 
 ## [Data](/Data)
 - panther_enrich_*.xlsx: output of enriched pathways from Panther (http://www.pantherdb.org/)
-- Ag3
 
 ## [Figures](/Figures)
 
