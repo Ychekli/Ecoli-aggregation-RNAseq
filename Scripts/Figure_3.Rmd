@@ -1,0 +1,130 @@
+---
+title: "Figure_3"
+output: html_document
+date: '2022-08-23'
+---
+#Setup
+```{r setup, message=FALSE}
+library(tidyverse)
+library(UpSetR)#devtools::install_github("hms-dbmi/UpSetR")
+```
+
+# Loading data
+```{r loadData, warning=FALSE}
+DataPcLvsDelta <- readxl::read_xlsx("../Data/CmPcLFlu_vs_Delta_Flu_degs_DESeq2_cog.xlsx")
+DataPcLvsBlanche <- readxl::read_xlsx("../Data/CmPcLFlu_vs_LacZ_blanche_degs_DESeq2_cog.xlsx")
+BleuevsDelta <- readxl::read_xlsx("../Data/LacZ_Bleue_vs_Delta_Flu_degs_DESeq2_cog.xlsx")
+BleuevsBlanche <- readxl::read_xlsx("../Data/LacZ_Bleue_vs_LacZ_blanche_degs_DESeq2_cog.xlsx")
+Ag2_Nb2vsAg2_Nb3 <- readxl::read_xlsx("../Data/Ag2-Nb2_vs_Ag2-Nb3_degs_DESeq2_cog.xlsx")
+Ag2_Nb2vsAg3_Nb2 <- readxl::read_xlsx("../Data/Ag2-Nb2_vs_Ag3-Nb2_degs_DESeq2_cog.xlsx")
+Ag3_Nb3vsAg2_Nb3 <- readxl::read_xlsx("../Data/Ag3-Nb3_vs_Ag2-Nb3_degs_DESeq2_cog.xlsx")
+Ag3_Nb3vsAg3_Nb2 <- readxl::read_xlsx("../Data/Ag3-Nb3_vs_Ag3-Nb2_degs_DESeq2_cog.xlsx")
+```
+
+
+# Formating gene lists
+```{r formatGenelist}
+DataPcLvsDeltasig <- select(DataPcLvsDelta, c("Name",	"log2FoldChange",	"padj",	"cog_cogid",	"cog_name",	"cog_pathways",	"cog_category", "cog_description","locus_tag"))%>%
+  mutate(log2FoldChange=as.numeric(log2FoldChange),padj =as.numeric(padj)) %>% 
+  filter(abs(log2FoldChange) >= 1 & padj < 0.05) %>% 
+  rename(log2FoldChange_DataPcLvsDelta = log2FoldChange, padj_DataPcLvsDelta = padj)
+
+DataPcLvsBlanchesig <- select(DataPcLvsBlanche, c("Name",	"log2FoldChange",	"padj",	"cog_cogid",	"cog_name",	"cog_pathways",	"cog_category", "cog_description","locus_tag"))%>%
+  mutate(log2FoldChange=as.numeric(log2FoldChange),padj =as.numeric(padj)) %>% 
+  filter(abs(log2FoldChange) >= 1 & padj < 0.05) %>% 
+  rename(log2FoldChange_DataPcLvsBlanche = log2FoldChange, padj_DataPcLvsBlanchesig = padj)
+
+BleuevsDeltasig <- select(BleuevsDelta, c("Name",	"log2FoldChange",	"padj",	"cog_cogid",	"cog_name",	"cog_pathways",	"cog_category", "cog_description","locus_tag"))%>%
+  mutate(log2FoldChange=as.numeric(log2FoldChange),padj =as.numeric(padj)) %>% 
+  filter(abs(log2FoldChange) >= 1 & padj < 0.05) %>% 
+  rename(log2FoldChange_BleuevsDelta = log2FoldChange, padj_BleuevsDelta = padj)
+
+BleuevsBlanchesig <- select(BleuevsBlanche, c("Name",	"log2FoldChange",	"padj",	"cog_cogid",	"cog_name",	"cog_pathways",	"cog_category", "cog_description","locus_tag"))%>%
+  mutate(log2FoldChange=as.numeric(log2FoldChange),padj =as.numeric(padj)) %>% 
+  filter(abs(log2FoldChange) >= 1 & padj < 0.05) %>%
+  rename(log2FoldChange_BleuevsBlanche = log2FoldChange, padj_BleuevsBlanche = padj)
+
+Ag2_Nb2vsAg2_Nb3sig <- select(Ag2_Nb2vsAg2_Nb3, c("Name",	"log2FoldChange",	"padj",	"cog_cogid",	"cog_name",	"cog_pathways",	"cog_category", "cog_description","locus_tag"))%>%
+  mutate(log2FoldChange=as.numeric(log2FoldChange),padj =as.numeric(padj)) %>% 
+  filter(abs(log2FoldChange) >= 1 & padj < 0.05) %>% 
+  rename(log2FoldChange_Ag2_Nb2vsAg2_Nb3 = log2FoldChange, padj_Ag2_Nb2vsAg2_Nb3 = padj)
+
+Ag2_Nb2vsAg3_Nb2sig <- select(Ag2_Nb2vsAg3_Nb2, c("Name",	"log2FoldChange",	"padj",	"cog_cogid",	"cog_name",	"cog_pathways",	"cog_category", "cog_description","locus_tag"))%>%
+  mutate(log2FoldChange=as.numeric(log2FoldChange),padj =as.numeric(padj)) %>% 
+  filter(abs(log2FoldChange) >= 1 & padj < 0.05) %>% 
+  rename(log2FoldChange_Ag2_Nb2vsAg3_Nb2 = log2FoldChange, padj_Ag2_Nb2vsAg3_Nb2 = padj)
+
+Ag3_Nb3vsAg3_Nb2sig <- select(Ag3_Nb3vsAg3_Nb2, c("Name",	"log2FoldChange",	"padj",	"cog_cogid",	"cog_name",	"cog_pathways",	"cog_category", "cog_description","locus_tag"))%>%
+  mutate(log2FoldChange=as.numeric(log2FoldChange),padj =as.numeric(padj)) %>% 
+  filter(abs(log2FoldChange) >= 1 & padj < 0.05) %>% 
+  rename(log2FoldChange_Ag3_Nb3vsAg3_Nb2 = log2FoldChange, padj_Ag3_Nb3vsAg3_Nb2 = padj)
+
+Ag3_Nb3vsAg2_Nb3sig <- select(Ag3_Nb3vsAg2_Nb3, c("Name",	"log2FoldChange",	"padj",	"cog_cogid",	"cog_name",	"cog_pathways",	"cog_category", "cog_description","locus_tag"))%>%
+  mutate(log2FoldChange=as.numeric(log2FoldChange),padj =as.numeric(padj)) %>% 
+  filter(abs(log2FoldChange) >= 1 & padj < 0.05) %>%
+  rename(log2FoldChange_Ag3_Nb3vsAg2_Nb3 = log2FoldChange, padj_Ag3_Nb3vsAg2_Nb3 = padj)
+```
+
+```{r JoindedData}
+Flu_fulljoin <- full_join(DataPcLvsDeltasig,BleuevsDeltasig) %>% full_join(BleuevsBlanchesig) %>% full_join(DataPcLvsBlanchesig)
+writexl::write_xlsx(Flu_fulljoin,"../OutputTables/Flu_fulljoin.xlsx")
+
+NB_fulljoin <- full_join(Ag2_Nb2vsAg2_Nb3sig ,Ag2_Nb2vsAg3_Nb2sig) %>% full_join(Ag3_Nb3vsAg3_Nb2sig) %>% full_join(Ag3_Nb3vsAg2_Nb3sig)
+writexl::write_xlsx(NB_fulljoin,"../OutputTables/Common_Nanobodies.xlsx")
+
+Flu_NB_fulljoin <- full_join(Flu_fulljoin,NB_fulljoin)
+writexl::write_xlsx(Flu_NB_fulljoin,"../OutputTables/Commongene_Nb_and_Flu.xlsx")
+
+```
+
+# Calculating and plotting results
+```{r plot}
+metadata_Flu_NB <- data.frame(sets=c("Ag2Nb2vsAg2Nb3", "Ag2Nb2vsAg3Nb2", "Ag3Nb3vsAg2Nb3",
+                                     "Ag3Nb3vsAg3Nb2", "PcLvsDelta", "BleuevsDelta",
+                                     "BleuevsBlanche", "PcLvsBlanche"),
+                              comparison=c("Ag2Nb2vsAg2Nb3", "Ag2Nb2vsAg3Nb2", "Ag3Nb3vsAg2Nb3",
+                                           "Ag3Nb3vsAg3Nb2", "PcLvsDelta", "BleuevsDelta",
+                                           "BleuevsBlanche", "PcLvsBlanche"))
+
+genelistAg2Nb2vsAg2Nb3 <- Flu_NB_fulljoin %>% filter(!is.na(log2FoldChange_Ag2_Nb2vsAg2_Nb3))
+genelistAg2Nb2vsAg3Nb2 <- filter(Flu_NB_fulljoin, !is.na(log2FoldChange_Ag2_Nb2vsAg3_Nb2))
+genelistAg3Nb3vsAg2Nb3 <- filter(Flu_NB_fulljoin, !is.na(log2FoldChange_Ag3_Nb3vsAg2_Nb3))
+genelistAg3Nb3vsAg3Nb2 <- filter(Flu_NB_fulljoin, !is.na(log2FoldChange_Ag3_Nb3vsAg3_Nb2))
+genelistPcLvsDelta <- filter(Flu_NB_fulljoin, !is.na(log2FoldChange_DataPcLvsDelta))
+genelistBleuevsDelta <- filter(Flu_NB_fulljoin, !is.na(log2FoldChange_BleuevsDelta))
+genelistBleuevsBlanche <- filter(Flu_NB_fulljoin, !is.na(log2FoldChange_BleuevsBlanche))
+genelistPcLvsBlanche <- filter(Flu_NB_fulljoin, !is.na(log2FoldChange_DataPcLvsBlanche))
+
+listcomparisons_Flu_NB <- list(Ag2Nb2_vs_Ag2Nb3=genelistAg2Nb2vsAg2Nb3$Name,
+                               Ag2Nb2_vs_Ag3Nb2=genelistAg2Nb2vsAg3Nb2$Name,
+                               Ag3Nb3_vs_Ag2Nb3=genelistAg3Nb3vsAg2Nb3$Name,
+                               Ag3Nb3_vs_Ag3Nb2=genelistAg3Nb3vsAg3Nb2$Name,
+                               PcLag43_vs_Delta_ag43=genelistPcLvsDelta$Name,
+                               ag43_On_vs_Delta_ag43=genelistBleuevsDelta$Name,
+                               ag43_On_vs_ag43_Off=genelistBleuevsBlanche$Name,
+                               PcLag43_vs_ag43_Off=genelistPcLvsBlanche$Name)
+
+pdf(file="../Figures/Figure3_UpSetPlot.pdf", width=8, height=5)
+
+upset(fromList(listcomparisons_Flu_NB), nsets = 8, 
+      order.by = "freq",
+      queries = list(list(query = intersects, params = list("PcLag43_vs_Delta_ag43","ag43_On_vs_Delta_ag43",
+                                                            "ag43_On_vs_ag43_Off","PcLag43_vs_ag43_Off"), 
+                          color="aquamarine3", active = T),
+                     list(query = intersects, params = list("Ag2Nb2_vs_Ag2Nb3","Ag2Nb2_vs_Ag3Nb2",
+                                                            "Ag3Nb3_vs_Ag2Nb3","Ag3Nb3_vs_Ag3Nb2"),
+                          color="salmon3", active = T),
+                     list(query = intersects, params = list("Ag2Nb2_vs_Ag2Nb3","Ag2Nb2_vs_Ag3Nb2",
+                                                            "Ag3Nb3_vs_Ag2Nb3","Ag3Nb3_vs_Ag3Nb2",
+                                                            "PcLag43_vs_Delta_ag43","ag43_On_vs_Delta_ag43",
+                                                            "ag43_On_vs_ag43_Off","PcLag43_vs_ag43_Off"),
+                          color="wheat3", active = T)))
+dev.off()
+
+```
+
+```{r sessioninfo}
+sessionInfo()
+```
+
+

@@ -1,0 +1,45 @@
+---
+title: "FigureS2_Aggregates_Size"
+output: html_document
+date: '2022-12-07'
+---
+# Setup and load libraries
+```{r setup}
+library(ggpubr)
+library(patchwork)
+library(ggforce)
+library(ggdist)
+library(gghalves)
+theme_set(theme_bw())
+scientific_10 <- function(x) {
+  parse(text=gsub("e", " %*% 10^", scales::scientific_format()(x)))
+}
+```
+
+# Read in data and format
+```{r Load data and format}
+data <- readxl::read_xlsx("../Data/Figure_S2_Analyze_size_aggregates_MeanOfEachField.xlsx") %>% 
+  mutate(Area=as.numeric(Area))
+```
+
+# Plot
+```{r Plot}
+ggplot(data, aes(y=Strain, x=Area)) + 
+  ggdist::stat_halfeye(aes(fill=Strain), adjust = .6, width = .7, .width = 0, 
+                       justification = -.2, point_colour = NA) + 
+  geom_jitter(aes(color=Strain), height = .1) +
+  geom_boxplot(aes(fill=Strain),alpha=0.4, width = .2, outlier.shape = NA) + 
+  scale_x_log10(label=scientific_10)+
+  scale_fill_manual(values=c(PcLag43="dodgerblue", 
+                             `Ag43_On`="darkgreen", `Ag2/Nb2`="orange",`Ag3/Nb3`="darkred"))+
+  scale_color_manual(values=c(PcLag43="dodgerblue", 
+                              `Ag43_On`="darkgreen", `Ag2/Nb2`="orange",`Ag3/Nb3`="darkred"))+
+  theme(legend.position=c(0.8, 0.2))
+
+ggsave("../Figures/FigureS2_Aggregates_size_Plot.pdf", width=8, height=4)
+```
+
+```{r sessioninfo}
+sessionInfo()
+```
+

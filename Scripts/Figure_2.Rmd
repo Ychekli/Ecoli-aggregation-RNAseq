@@ -1,0 +1,68 @@
+---
+title: "Figure 2"
+output: html_document
+date: '2022-08-23'
+---
+
+This script use the vst normalized transcripts count to calculate the PCA to represent similarity between overall transcription profiles.
+
+# Setup and load libraries
+```{r setup, message=FALSE}
+library(tidyverse)
+library(ggfortify)
+theme_set(theme_bw())
+```
+
+# Read in data and format
+```{r loadData}
+pcadataraw_flu <- readxl::read_xlsx("../Data/Figure_2_counts_vst_norm_ag43.xlsx")
+pcadataraw_NB <- readxl::read_xlsx("../Data/Figure_2_counts_vst_norm_NB.xlsx")
+pcadatameta<- readxl::read_xlsx("../Data/Figure_2_PCA_Metadata.xlsx")
+```
+
+
+```{r format}
+pcadataraw_Flu_NB <- full_join(pcadataraw_flu,pcadataraw_NB)
+pcadata <- pcadataraw_Flu_NB %>% 
+  select(-c(Gene_name,Gene_number))%>%
+  select(pcadatameta$Sample_Name) %>%
+  mutate_if(is.character, as.numeric) %>% 
+  as.matrix() 
+
+rownames(pcadata) <- pcadataraw_Flu_NB$Gene_name
+pcadatatranspose <- t(pcadata) 
+
+```
+# Calculate and plot PCA
+Use prcomp with default settings
+```{r CalculatePCA}
+pca_result <- prcomp(pcadatatranspose)
+```
+
+
+```{r plot}
+autoplot(pca_result,size=6, data=pcadatameta,fill="Strain",shape="Aggregation",
+         frame=TRUE,frame.colour = "Strain",level = 0.95,
+         loadings.label.repel=TRUE,loadings.label.size=3.5)+
+  scale_shape_manual(values = c(21,22))+
+  scale_fill_manual(values=c(`∆ag43`="blue",`ag43_Off`="green",
+                             `Ag2_Nb3`="red", `Ag3_Nb2`= "darkgoldenrod", PcLag43="dodgerblue", 
+                             `ag43_On`="darkgreen", `Ag2_Nb2`="orange",`Ag3_Nb3`="darkred"))+
+  scale_color_manual(values=c(`∆ag43`="blue",`ag43_Off`="green",
+                              `Ag2_Nb3`="red", `Ag3_Nb2`= "darkgoldenrod", PcLag43="dodgerblue", 
+                              `ag43_On`="darkgreen", `Ag2_Nb2`="orange",`Ag3_Nb3`="darkred"))+
+  guides( color='none',
+          fill = guide_legend(
+    override.aes=list(shape = c(22,22,22,22,21,21,21,21))))
+
+  
+ggsave("../Figures/Figure2_PCA.png", width = 6, height = 5)
+ggsave("../Figures/Figure2_PCA.pdf", width = 6, height = 5)
+
+```
+
+
+```{r sessioninfo}
+sessionInfo()
+```
+

@@ -1,0 +1,176 @@
+---
+title: "Figure_4_5_6"
+output: html_document
+date: '2022-08-25'
+---
+
+# Set Up
+
+```{r setup, message=FALSE}
+library(tidyverse)
+theme_set(theme_bw()+theme(plot.background = element_blank(), 
+                           axis.line = element_line(size=0.5),
+                           panel.border = element_blank(),
+                           strip.background = element_rect(color="transparent"),
+                           panel.background = element_blank(),
+                           axis.title=element_text(size=12,face="bold"),
+                           strip.text = element_text(size=12, face="bold"),
+                           axis.text = element_text(size = 10),
+                           title=element_text(size=8,face="bold"),
+                           legend.position = "none",
+                           axis.text.x = element_text(lineheight = 1.2)))
+
+
+```
+
+
+
+# Figure 4
+
+```{r all_Loadtables}
+panther_enrich_up <- readxl::read_xlsx("../Data/panther_common_genes_up.xlsx", sheet = "panther_common_genes_up")
+panther_enrich_all_noGO <- readxl::read_xlsx("../Data/panther_enrich_up.xlsx", sheet = "up")
+panther_enrich_down <- readxl::read_xlsx("../Data/panther_common_genes_up.xlsx", sheet = "panther_common_genes_down")
+```
+
+```{r all_format}
+#Create GO ID
+panther_enrich_up <- separate(panther_enrich_up, GO_biological_process_complete, sep = ", ", into = c("Biological_process","Gene ontology IDs"))
+writexl::write_xlsx(panther_enrich_up,"../OutputTables/panther_enrich_up.xlsx")
+
+panther_enrich_down <- separate(panther_enrich_down, GO_biological_process_complete, sep = ", ", into = c("Biological_process","Gene ontology IDs"))
+writexl::write_xlsx(panther_enrich_down,"../OutputTables/panther_enrich_down.xlsx")
+#Full join both sheet
+panther_enrich_all <- full_join(panther_enrich_up,panther_enrich_down)
+
+#Full join with Go table
+panther_enrich_all_GO <- right_join(panther_enrich_all,panther_enrich_all_noGO) %>% 
+  mutate(fold_Enrichment=as.numeric(fold_Enrichment)) %>% 
+  mutate(Biological_process= recode(Biological_process,
+                                    "peptidyl-L-beta-methylthioaspartic acid biosynthetic process from peptidyl-aspartic acid"="peptidyl-L-beta-methylthioaspartic acid biosynthetic process"),
+         Biological_process = reorder(Biological_process, fold_Enrichment))
+writexl::write_xlsx(panther_enrich_all_GO,"../OutputTables/panther_enrich_all.xlsx")
+```
+
+```{r all_plot, fig.width=10}
+
+panther_enrich_all_GO %>% 
+  mutate(Up_Down=factor(Up_Down, levels=c("Over_represented","Under_represented"),
+                        labels=c("Over Represented","Under Represented"))) %>% 
+  ggplot(aes(x =Biological_process , y= fold_Enrichment, 
+                                  fill = Up_Down, order_by(fold_Enrichment)))+
+  geom_col(position = position_dodge())+ 
+  geom_text(aes(label=`Gene ontology IDs`, y=20), size=3)+
+  geom_text(aes(label=paste0("(", Input, " of ", REFLIST,")"), y=23), hjust=0, size=3)+
+  coord_flip() + 
+  guides(x = guide_axis(n.dodge = 1))+
+  scale_fill_manual(values=c("coral2", "midnightblue"))+
+  scale_y_continuous(limits=c(0, 25))+
+  ylab("Fold enrichment") +  xlab(NULL) + 
+  facet_grid(Up_Down~., scales= "free_y", space = "free")
+
+ggsave("../Figures/Figure4_GOaggregates.pdf", width=10, height=10)
+
+```
+
+
+#Figure 5
+
+```{r ag43_loadTables}
+panther_enrich_Flu_up <- readxl::read_xlsx("../Data/panther_enrich_uniqueFlu_up.xlsx")
+panther_enrich_Flu_down <- readxl::read_xlsx("../Data/panther_enrich_uniqueFlu_down.xlsx")
+panther_enrich_UniqueFlu <- readxl::read_xlsx("../Data/panther_enrich_uniqueFlu.xlsx")
+```
+
+```{r ag43_Formatgenelists}
+#Create GO ID
+panther_enrich_Flu_up <- separate(panther_enrich_Flu_up, Biological_process, sep = " ,", into = c("Biological_process","Gene ontology IDs"))
+panther_enrich_Flu_down <- separate(panther_enrich_Flu_down, Biological_process, sep = " ,", into = c("Biological_process","Gene ontology IDs"))
+
+#Full join both sheet
+panther_enrich_Flu_all <- full_join(panther_enrich_Flu_up,panther_enrich_Flu_down)
+
+
+#FLu join with Go table
+panther_enrich_Flu_all_GO <- panther_enrich_Flu_all %>% 
+  mutate(Biological_process=str_trim(Biological_process)) %>% 
+  right_join(panther_enrich_UniqueFlu) %>% 
+  mutate(fold_Enrichment=as.numeric(fold_Enrichment)) %>% 
+  mutate(Biological_process = reorder(Biological_process, fold_Enrichment))
+writexl::write_xlsx(panther_enrich_Flu_all_GO,"../OutputTables/panther_enrich_Flu_all.xlsx")
+```
+
+```{r ag43_plot, fig.width=10}
+
+panther_enrich_Flu_all_GO %>% 
+  mutate(Up_Down=factor(Up_Down, levels=c("Over_represented","Under_represented"),
+                        labels=c("Over Represented","Under Represented"))) %>% 
+  ggplot(aes(x =Biological_process , y= fold_Enrichment, 
+                                  fill = Up_Down, order_by(fold_Enrichment)))+
+  geom_col(position = position_dodge())+ 
+  geom_text(aes(label=`Gene ontology IDs`, y=57), size=3)+
+  geom_text(aes(label=paste0("(", Input, " of ", REFLIST,")"), y=66), hjust=0, size=3)+
+  coord_flip() + 
+  guides(x = guide_axis(n.dodge = 1))+
+  scale_fill_manual(values=c("coral2", "midnightblue"))+
+  scale_y_continuous(limits=c(0, 75))+
+  ylab("Fold enrichment") +  xlab(NULL) + 
+  facet_grid(Up_Down~., scales= "free_y", space = "free")
+
+ggsave("../Figures/Figure5_GO_flu.pdf", width=10, height=7)
+
+```
+
+
+# Figure 6
+
+```{r NB_LoadTables}
+panther_enrich_NB_up <- readxl::read_xlsx("../Data/panther_enrich_uniqueNB_up.xlsx")
+panther_enrich_NB_down <- readxl::read_xlsx("../Data/panther_enrich_uniqueNB_down.xlsx")
+panther_enrich_UniqueNB <- readxl::read_xlsx("../Data/panther_enrich_uniqueNB.xlsx")
+```
+
+
+```{r NB_format}
+#Create GO ID
+panther_enrich_NB_up <- separate(panther_enrich_NB_up, Biological_process, sep = " ,", into = c("Biological_process","Gene ontology IDs"))
+panther_enrich_NB_down <- separate(panther_enrich_NB_down, Biological_process, sep = " ,", into = c("Biological_process","Gene ontology IDs"))
+
+#Full join both sheet
+panther_enrich_NB_all <- full_join(panther_enrich_NB_up,panther_enrich_NB_down)
+
+#NB join with go table
+panther_enrich_NB_all_GO <- panther_enrich_NB_all %>% 
+  mutate(Biological_process=str_trim(Biological_process)) %>% 
+  right_join(panther_enrich_UniqueNB) %>% 
+  mutate(fold_Enrichment=as.numeric(fold_Enrichment)) %>% 
+  mutate(Biological_process = reorder(Biological_process, fold_Enrichment))
+writexl::write_xlsx(panther_enrich_NB_all_GO,"../OutputTables/panther_enrich_NB_all.xlsx")
+```
+
+```{r NB_plot, fig.width=10}
+
+panther_enrich_NB_all_GO %>% drop_na(fold_Enrichment) %>% 
+  mutate(Up_Down=factor(Up_Down, levels=c("Over_represented","Under_represented"),
+                        labels=c("Over Represented","Under Represented"))) %>% 
+  ggplot(aes(x =Biological_process , y= fold_Enrichment, 
+                                  fill = Up_Down, order_by(fold_Enrichment)))+
+  geom_col(position = position_dodge())+ 
+  geom_text(aes(label=`Gene ontology IDs`, y=110), size=3)+
+  geom_text(aes(label=paste0("(", Input, " of ", REFLIST,")"), y=122), hjust=0, size=3)+
+  coord_flip() + 
+  guides(x = guide_axis(n.dodge = 1))+
+  scale_fill_manual(values=c("coral2", "midnightblue"))+
+  scale_y_continuous(limits=c(0, 128))+
+  ylab("Fold enrichment") +  xlab(NULL) + 
+  facet_grid(Up_Down~., scales= "free_y", space = "free")
+
+ggsave("../Figures/Figure6_GO_NB.pdf", width=10, height=6)
+
+
+```
+
+```{r sessioninfo}
+sessionInfo()
+```
+
