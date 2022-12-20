@@ -379,7 +379,7 @@ theme_set(theme_bw())</code></pre>
 </div>
 <div id="read-in-data-and-format" class="section level1">
 <h1>Read in data and format</h1>
-<pre class="r"><code>data &lt;- readxl::read_xlsx(&quot;../Data/Figure_S1.xlsx&quot;)%&gt;%
+<pre class="r"><code>data &lt;- readxl::read_xlsx(&quot;../Data/Figure_S2_Amikacin_Resistance.xlsx&quot;)%&gt;%
   filter(CMI!=&quot;T0&quot;) %&gt;% 
   mutate(Strains=factor(Strains, levels=c(&quot;∆ag43&quot;,&quot;Ag43_off&quot;,&quot;Ag2/Nb3&quot;,&quot;PcLag43&quot;,&quot;Ag43_On&quot;,&quot;Ag2/Nb2&quot;))) %&gt;% 
   mutate(CMI=factor(CMI, levels =c(&quot;0&quot;,&quot;30&quot;,&quot;40&quot;,&quot;50&quot;,&quot;60&quot;),

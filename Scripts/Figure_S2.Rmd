@@ -18,7 +18,7 @@ theme_set(theme_bw())
 # Read in data and format
 
 ```{r format}
-data <- readxl::read_xlsx("../Data/Figure_S1.xlsx")%>%
+data <- readxl::read_xlsx("../Data/Figure_S2_Amikacin_Resistance.xlsx")%>%
   filter(CMI!="T0") %>% 
   mutate(Strains=factor(Strains, levels=c("∆ag43","Ag43_off","Ag2/Nb3","PcLag43","Ag43_On","Ag2/Nb2"))) %>% 
   mutate(CMI=factor(CMI, levels =c("0","30","40","50","60"),

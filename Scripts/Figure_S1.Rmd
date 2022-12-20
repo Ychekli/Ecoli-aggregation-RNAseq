@@ -21,7 +21,7 @@ scientific_10 <- function(x) {
 
 # Read in data and format
 ```{r Load data and format}
-data <- readxl::read_xlsx("../Data/Figure_S2_Analyze_size_aggregates_MeanOfEachField.xlsx") %>% 
+data <- readxl::read_xlsx("../Data/Figure_S1_Analyze_size_aggregates_MeanOfEachField.xlsx") %>% 
   mutate(Area=as.numeric(Area))
 ```
 
