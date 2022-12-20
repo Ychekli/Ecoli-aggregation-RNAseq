@@ -1,45 +1,67 @@
 ---
-title: "FigureS2_Aggregates_Size"
+title: "Figure S2 Resistance to amikacin"
 output: html_document
-date: '2022-12-07'
+date: '2022-12-20'
 ---
+
 # Setup and load libraries
-```{r setup}
+
+```{r setup, message=FALSE}
+library(tidyverse)
 library(ggpubr)
-library(patchwork)
-library(ggforce)
-library(ggdist)
-library(gghalves)
+library(scales)
+library(ggbeeswarm)
+
 theme_set(theme_bw())
-scientific_10 <- function(x) {
-  parse(text=gsub("e", " %*% 10^", scales::scientific_format()(x)))
-}
 ```
 
 # Read in data and format
-```{r Load data and format}
-data <- readxl::read_xlsx("../Data/Figure_S2_Analyze_size_aggregates_MeanOfEachField.xlsx") %>% 
-  mutate(Area=as.numeric(Area))
+
+```{r format}
+data <- readxl::read_xlsx("../Data/Figure_S1.xlsx")%>%
+  filter(CMI!="T0") %>% 
+  mutate(Strains=factor(Strains, levels=c("∆ag43","Ag43_off","Ag2/Nb3","PcLag43","Ag43_On","Ag2/Nb2"))) %>% 
+  mutate(CMI=factor(CMI, levels =c("0","30","40","50","60"),
+                   labels=c("0 x MIC","30","40","50","60")))
+
 ```
 
-# Plot
-```{r Plot}
-ggplot(data, aes(y=Strain, x=Area)) + 
-  ggdist::stat_halfeye(aes(fill=Strain), adjust = .6, width = .7, .width = 0, 
-                       justification = -.2, point_colour = NA) + 
-  geom_jitter(aes(color=Strain), height = .1) +
-  geom_boxplot(aes(fill=Strain),alpha=0.4, width = .2, outlier.shape = NA) + 
-  scale_x_log10(label=scientific_10)+
-  scale_fill_manual(values=c(PcLag43="dodgerblue", 
-                             `Ag43_On`="darkgreen", `Ag2/Nb2`="orange",`Ag3/Nb3`="darkred"))+
-  scale_color_manual(values=c(PcLag43="dodgerblue", 
-                              `Ag43_On`="darkgreen", `Ag2/Nb2`="orange",`Ag3/Nb3`="darkred"))+
-  theme(legend.position=c(0.8, 0.2))
+# Plot the survival of each strain towards amikacin compared to ∆ag43
 
-ggsave("../Figures/FigureS2_Aggregates_size_Plot.pdf", width=8, height=4)
+```{r plot, message=FALSE, warning=FALSE }
+ggplot(data, aes(x= Strains, y = CFU, fill=Strains, shape=Strains))+
+  geom_boxplot(alpha=0.6, color="grey30", outlier.shape = NA, show.legend = FALSE)+
+  geom_beeswarm(method = "center", cex=3, size = 1.3, color="grey30") +
+  facet_grid(.~CMI)+
+  scale_y_continuous(trans=pseudo_log_trans(base = 10),
+                     breaks = c(0,100,10000,1000000,10000000, 100000000,1000000000),
+                     labels = trans_format('log10', math_format(10^.x)))+
+  scale_shape_manual(values=c(`∆ag43`=22,`Ag43_off`=22,
+                             `Ag2/Nb3`= 22, PcLag43=21, 
+                             `Ag43_On`=21, `Ag2/Nb2`=21))+
+  scale_color_manual(values=c(`∆ag43`="blue",`Ag43_off`="green",
+                             `Ag2/Nb3`= "red", PcLag43="dodgerblue", 
+                             `Ag43_On`="darkgreen", `Ag2/Nb2`="orange"))+
+  scale_fill_manual(values=c(`∆ag43`="blue",`Ag43_off`="green",
+                        `Ag2/Nb3`= "red", PcLag43="dodgerblue", 
+                             `Ag43_On`="darkgreen", `Ag2/Nb2`="orange"))+
+  stat_compare_means(label="p.signif", method="wilcox", hide.ns = TRUE, 
+                     ref.group = c("∆ag43"), size=4.5) +
+  theme(axis.text.x = element_blank(),
+        strip.background = element_rect(color="transparent"),
+        axis.ticks.x=element_blank(),
+        strip.text = element_text(size=15),
+        axis.text = element_text(size=10),
+        legend.position = c(0.1,0.4))+
+  labs(y="CFU/mL")+
+   guides(fill=guide_legend(override.aes = list(size = 4)))
+
+#Save plot
+ggsave("../Figures/FigureS2_resistance_agregat_amikacin.pdf", width = 10 , height = 4.5)
+ggsave("../Figures/FigureS2_resistance_agregat_amikacin.png", width = 10 , height = 4.5, dpi = 600)
+
 ```
 
-```{r sessioninfo}
+```{r info}
 sessionInfo()
 ```
-

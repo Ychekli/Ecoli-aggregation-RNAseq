@@ -1,7 +1,7 @@
 ---
-title: "Figure 2"
+title: "Figure 2 RNAseq PCA of normalized counts"
 output: html_document
-date: '2022-08-23'
+date: '2022-12-20'
 ---
 
 This script use the vst normalized transcripts count to calculate the PCA to represent similarity between overall transcription profiles.
@@ -17,7 +17,10 @@ theme_set(theme_bw())
 ```{r loadData}
 pcadataraw_flu <- readxl::read_xlsx("../Data/Figure_2_counts_vst_norm_ag43.xlsx")
 pcadataraw_NB <- readxl::read_xlsx("../Data/Figure_2_counts_vst_norm_NB.xlsx")
-pcadatameta<- readxl::read_xlsx("../Data/Figure_2_PCA_Metadata.xlsx")
+pcadatameta<- readxl::read_xlsx("../Data/Figure_2_PCA_Metadata.xlsx") %>% 
+   mutate(Aggregation=recode(Aggregation, "Planktonic"="Non-aggregate"),
+          Strain=factor(Strain, levels=c("∆ag43","ag43_Off", "Ag2_Nb3", "Ag3_Nb2",
+                                         "PcLag43","ag43_On", "Ag2_Nb2", "Ag3_Nb3")))
 ```
 
 
@@ -47,10 +50,14 @@ autoplot(pca_result,size=6, data=pcadatameta,fill="Strain",shape="Aggregation",
   scale_shape_manual(values = c(21,22))+
   scale_fill_manual(values=c(`∆ag43`="blue",`ag43_Off`="green",
                              `Ag2_Nb3`="red", `Ag3_Nb2`= "darkgoldenrod", PcLag43="dodgerblue", 
-                             `ag43_On`="darkgreen", `Ag2_Nb2`="orange",`Ag3_Nb3`="darkred"))+
+                             `ag43_On`="darkgreen", `Ag2_Nb2`="orange",`Ag3_Nb3`="darkred"),
+                        labels=c("∆ag43","ag43_Off", "Ag2/Nb3", "Ag3/Nb2",
+                                         "PcLag43","ag43_On", "Ag2/Nb2", "Ag3/Nb3"))+
   scale_color_manual(values=c(`∆ag43`="blue",`ag43_Off`="green",
                               `Ag2_Nb3`="red", `Ag3_Nb2`= "darkgoldenrod", PcLag43="dodgerblue", 
-                              `ag43_On`="darkgreen", `Ag2_Nb2`="orange",`Ag3_Nb3`="darkred"))+
+                              `ag43_On`="darkgreen", `Ag2_Nb2`="orange",`Ag3_Nb3`="darkred"),
+                        labels=c("∆ag43","ag43_Off", "Ag2/Nb3", "Ag3/Nb2",
+                                         "PcLag43","ag43_On", "Ag2/Nb2", "Ag3/Nb3"))+
   guides( color='none',
           fill = guide_legend(
     override.aes=list(shape = c(22,22,22,22,21,21,21,21))))
