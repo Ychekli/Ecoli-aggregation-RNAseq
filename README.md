@@ -1,6 +1,14 @@
-# Ecoli-aggregation-RNAseq
+# *E. coli* aggregation RNAseq with native and synthetic adhesins
 
-This repo hosts all proccesed sequencing data and scripts to generate the figures in the manuscript.
+This repo hosts all proccesed sequencing data and scripts to generate the figures in the manuscript. The raw sequencing data for this study have been deposited in the European
+Nucleotide Archive (ENA) at EMBL-EBI under accession number E-MTAB-11396.
+
+### To cite this work:
+Chekli, Y., Stevick, R.J., Kornobis, E., Briolat, V., Ghigo, J.M., and Beloin, C. (2023). Transcriptomic analysis of native and synthetic *Escherichia coli* aggregates reveals both a core and an adhesin-specific response.
+
+### This repository has been archived on Zenodo. Access or cite the most recent release:  
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7595094.svg)](https://doi.org/10.5281/zenodo.7595094)
+
 
 # Contents
 
