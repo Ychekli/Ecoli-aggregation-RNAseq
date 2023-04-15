@@ -4,9 +4,10 @@ This repo hosts all proccesed sequencing data and scripts to generate the figure
 Nucleotide Archive (ENA) at EMBL-EBI under accession number E-MTAB-11396.
 
 ### To cite this work:
-Chekli, Y., Stevick, R.J., Kornobis, E., Briolat, V., Ghigo, J.M., and Beloin, C. (2023). Transcriptomic analysis of native and synthetic *Escherichia coli* aggregates reveals both a core and an adhesin-specific response.
+Chekli, Y., Stevick, R. J., Kornobis, E., Briolat, V., Ghigo, J. M., & Beloin, C. (2023). Escherichia coli aggregates mediated by native or synthetic adhesins exhibit both core and adhesin-specific transcriptional responses. *Microbiology Spectrum*, e00690-23.
 
-### This repository has been archived on Zenodo. Access or cite the most recent release:  
+
+#### This repository has been archived on Zenodo. Access or cite the most recent release:  
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7595094.svg)](https://doi.org/10.5281/zenodo.7595094)
 
 
